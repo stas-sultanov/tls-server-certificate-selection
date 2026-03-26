@@ -57,20 +57,6 @@ To build and run tests on Windows:
   - **Remote – WSL** (`ms-vscode-remote.remote-wsl`)
   - **C# Dev Kit** (`ms-dotnettools.csdevkit`)
 
-## Building and Testing
-
-Build the solution:
-
-```sh
-dotnet build demo.slnx
-```
-
-Run all tests:
-
-```sh
-dotnet test demo.slnx
-```
-
 ---
 
 [rfc_8446]: https://www.rfc-editor.org/rfc/rfc8446
