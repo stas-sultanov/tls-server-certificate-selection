@@ -51,7 +51,7 @@ public static class TlsClientHelloParser
 		if (data.Length < 5)
 		{
 			info = default;
-			return TlsClientHelloParseErrorCode.Data_LengthIsInvalid;
+			return TlsClientHelloParseErrorCode.Data_Length_IsInvalid;
 		}
 
 		// Create reader
@@ -114,7 +114,7 @@ public static class TlsClientHelloParser
 		if (type != ContentTypeHandshake)
 		{
 			handshakeLength = default;
-			return TlsClientHelloParseErrorCode.TLSPlaintextField_Type_ValueIsNotHandshake;
+			return TlsClientHelloParseErrorCode.TLSPlaintextField_Type_IsInvalid;
 		}
 
 		// Skip TLSPlaintext.legacy_record_version, 2 bytes
@@ -131,7 +131,7 @@ public static class TlsClientHelloParser
 		// must not exceed the remaining bytes in the reader
 		if ((handshakeLength < HandshakeHeaderSize) || (handshakeLength > reader.Remaining))
 		{
-			return TlsClientHelloParseErrorCode.TLSPlaintextField_Length_ValueIsInvalid;
+			return TlsClientHelloParseErrorCode.TLSPlaintextField_Length_IsInvalid;
 		}
 
 		return TlsClientHelloParseErrorCode.None;
@@ -168,7 +168,7 @@ public static class TlsClientHelloParser
 		if (handshakeType != HandshakeTypeClientHello)
 		{
 			clientHelloLength = default;
-			return TlsClientHelloParseErrorCode.Handshake_MessageType_ValueIsNotClientHello;
+			return TlsClientHelloParseErrorCode.Handshake_MessageType_IsInvalid;
 		}
 
 		// Read Handshake.length, 3 bytes
@@ -182,7 +182,7 @@ public static class TlsClientHelloParser
 		// must not exceed the remaining bytes in the Handshake message
 		if ((clientHelloLength < 41) || (clientHelloLength > dataLength - HandshakeHeaderSize))
 		{
-			return TlsClientHelloParseErrorCode.Handshake_Length_ValueIsInvalid;
+			return TlsClientHelloParseErrorCode.Handshake_Length_IsInvalid;
 		}
 
 		return TlsClientHelloParseErrorCode.None;
@@ -225,7 +225,7 @@ public static class TlsClientHelloParser
 		if (remainingLength < 0 || legacySessionIdLength > 32)
 		{
 			info = default;
-			return TlsClientHelloParseErrorCode.ClientHello_LegacySessionIdLength_ValueIsInvalid;
+			return TlsClientHelloParseErrorCode.ClientHello_LegacySessionId_LengthIsInvalid;
 		}
 
 		// Skip ClientHello.legacy_session_id.data, length bytes
@@ -247,7 +247,7 @@ public static class TlsClientHelloParser
 		if (remainingLength < 0 || cipherSuitesLength == 0 || (cipherSuitesLength % 2) != 0)
 		{
 			info = default;
-			return TlsClientHelloParseErrorCode.ClientHello_CipherSuitesLength_ValueIsInvalid;
+			return TlsClientHelloParseErrorCode.ClientHello_CipherSuites_LengthIsInvalid;
 		}
 
 		// Create a slice representing the cipher suites
@@ -272,7 +272,7 @@ public static class TlsClientHelloParser
 		if (remainingLength < 0 || legacyCompressionMethodsLength < 1)
 		{
 			info = default;
-			return TlsClientHelloParseErrorCode.ClientHello_LegacyCompressionMethodsLength_ValueIsInvalid;
+			return TlsClientHelloParseErrorCode.ClientHello_LegacyCompressionMethods_LengthIsInvalid;
 		}
 
 		// Skip ClientHello.legacy_compression_methods.data, length bytes
@@ -338,6 +338,14 @@ public static class TlsClientHelloParser
 			return TlsClientHelloParseErrorCode.ReadError;
 		}
 
+		// Subtract the processed field size from the remaining available bytes
+		dataLength -= 2;
+
+		if (extensionsLength != dataLength)
+		{
+			return TlsClientHelloParseErrorCode.ClientHello_Extensions_LengthIsInvalid;
+		}
+
 		// TLS 1.2 ClientHello.extensions allow 0 value
 		if (extensionsLength == 0)
 		{
@@ -345,15 +353,12 @@ public static class TlsClientHelloParser
 			return TlsClientHelloParseErrorCode.None;
 		}
 
-		// Subtract the processed field size from the remaining available bytes
-		dataLength -= 2;
-
 		// Validate ClientHello.extensions.length
 		// must be between 8 and 65535
 		// must be exactly equal to the available bytes in the ClientHello.extensions block
-		if (extensionsLength < 8 || extensionsLength != dataLength)
+		if (extensionsLength < 8)
 		{
-			return TlsClientHelloParseErrorCode.ClientHello_ExtensionsLength_ValueIsInvalid;
+			return TlsClientHelloParseErrorCode.ClientHello_Extensions_LengthIsInvalid;
 		}
 
 		// Read ClientHello.extensions.data
@@ -378,7 +383,7 @@ public static class TlsClientHelloParser
 			// must not exceed the available bytes in the extensions block
 			if (dataLength < 0)
 			{
-				return TlsClientHelloParseErrorCode.Extension_ExtensionDataLength_ValueIsInvalid;
+				return TlsClientHelloParseErrorCode.Extension_ExtensionData_LengthIsInvalid;
 			}
 
 			switch (extensionType)
@@ -442,10 +447,17 @@ public static class TlsClientHelloParser
 		// must be non-zero
 		// must be a multiple of 2, since each signature scheme is represented by 2 bytes
 		// must exactly match the available bytes for reading
-		if (supportedSignatureAlgorithmsLength == 0 || (supportedSignatureAlgorithmsLength % 2) != 0 || (2 + supportedSignatureAlgorithmsLength) != dataLength)
+		if (supportedSignatureAlgorithmsLength == 0 || (supportedSignatureAlgorithmsLength % 2) != 0)
 		{
 			signatureAlgorithms = default;
-			return TlsClientHelloParseErrorCode.SignatureSchemeList_SupportedSignatureAlgorithmsLength_ValueIsInvalid;
+			return TlsClientHelloParseErrorCode.SignatureSchemeList_SupportedSignatureAlgorithms_LengthIsInvalid;
+		}
+
+		// Check if the declared length matches the actual available bytes for the signature algorithms list
+		if ((2 + supportedSignatureAlgorithmsLength) != dataLength)
+		{
+			signatureAlgorithms = default;
+			return TlsClientHelloParseErrorCode.SignatureSchemeList_SupportedSignatureAlgorithms_DataIsMalformed;
 		}
 
 		// Create a slice representing the supported signature algorithms

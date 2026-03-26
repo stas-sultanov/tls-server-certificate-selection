@@ -37,57 +37,62 @@ public enum TlsClientHelloParseErrorCode
 	Data_IsEmpty = ErrorCodeGroup.Data | 0x01,
 
 	/// <summary>
-	/// The input data length is invalid.
+	/// The input data.length is invalid.
 	/// </summary>
-	Data_LengthIsInvalid = ErrorCodeGroup.Data | 0x02,
+	Data_Length_IsInvalid = ErrorCodeGroup.Data | 0x02,
 
 	/// <summary>
 	/// The TLSPlaintext.length field value is invalid.
 	/// </summary>
-	TLSPlaintextField_Length_ValueIsInvalid = ErrorCodeGroup.Record | 0x01,
+	TLSPlaintextField_Length_IsInvalid = ErrorCodeGroup.Record | 0x01,
 
 	/// <summary>
-	/// The TLSPlaintext.type field value is not ContentType.handshake.
+	/// The TLSPlaintext.type field value is invalid.
 	/// </summary>
-	TLSPlaintextField_Type_ValueIsNotHandshake = ErrorCodeGroup.Record | 0x02,
+	TLSPlaintextField_Type_IsInvalid = ErrorCodeGroup.Record | 0x02,
 
 	/// <summary>
-	/// The Handshake.msg_type field value is not HandshakeType.client_hello.
+	/// The Handshake.msg_type field value is invalid.
 	/// </summary>
-	Handshake_MessageType_ValueIsNotClientHello = ErrorCodeGroup.Handshake | 0x01,
+	Handshake_MessageType_IsInvalid = ErrorCodeGroup.Handshake | 0x01,
 
 	/// <summary>
 	/// The Handshake.length field value is invalid.
 	/// </summary>
-	Handshake_Length_ValueIsInvalid = ErrorCodeGroup.Handshake | 0x02,
+	Handshake_Length_IsInvalid = ErrorCodeGroup.Handshake | 0x02,
 
 	/// <summary>
-	/// The ClientHello.legacy_session_id.length field value is invalid.
+	/// The ClientHello.legacy_session_id.length is invalid.
 	/// </summary>
-	ClientHello_LegacySessionIdLength_ValueIsInvalid = ErrorCodeGroup.ClientHello | 0x01,
+	ClientHello_LegacySessionId_LengthIsInvalid = ErrorCodeGroup.ClientHello | 0x01,
 
 	/// <summary>
-	/// The ClientHello.cipher_suites.length field value is invalid.
+	/// The ClientHello.cipher_suites.length is invalid.
 	/// </summary>
-	ClientHello_CipherSuitesLength_ValueIsInvalid = ErrorCodeGroup.ClientHello | 0x02,
+	ClientHello_CipherSuites_LengthIsInvalid = ErrorCodeGroup.ClientHello | 0x02,
 
 	/// <summary>
-	/// The ClientHello.legacy_compression_methods.length field value is invalid.
+	/// The ClientHello.legacy_compression_methods.length is invalid.
 	/// </summary>
-	ClientHello_LegacyCompressionMethodsLength_ValueIsInvalid = ErrorCodeGroup.ClientHello | 0x03,
+	ClientHello_LegacyCompressionMethods_LengthIsInvalid = ErrorCodeGroup.ClientHello | 0x03,
 
 	/// <summary>
-	/// The ClientHello.extensions.length field value is invalid.
+	/// The ClientHello.extensions.length is invalid.
 	/// </summary>
-	ClientHello_ExtensionsLength_ValueIsInvalid = ErrorCodeGroup.ClientHello | 0x04,
+	ClientHello_Extensions_LengthIsInvalid = ErrorCodeGroup.ClientHello | 0x04,
 
 	/// <summary>
-	/// The Extension.extension_data.length field value is invalid.
+	/// The Extension.extension_data.length is invalid.
 	/// </summary>
-	Extension_ExtensionDataLength_ValueIsInvalid = ErrorCodeGroup.Extension | 0x01,
+	Extension_ExtensionData_LengthIsInvalid = ErrorCodeGroup.Extension | 0x01,
 
 	/// <summary>
-	/// The SignatureSchemeList.supported_signature_algorithms.length field value is invalid.
+	/// The SignatureSchemeList.supported_signature_algorithms.length is invalid.
 	/// </summary>
-	SignatureSchemeList_SupportedSignatureAlgorithmsLength_ValueIsInvalid = ErrorCodeGroup.SignatureAlgorithm | 0x01
+	SignatureSchemeList_SupportedSignatureAlgorithms_LengthIsInvalid = ErrorCodeGroup.SignatureAlgorithm | 0x11,
+
+	/// <summary>
+	/// The SignatureSchemeList.supported_signature_algorithms.data is malformed.
+	/// </summary>
+	SignatureSchemeList_SupportedSignatureAlgorithms_DataIsMalformed = ErrorCodeGroup.SignatureAlgorithm | 0x12
 }
