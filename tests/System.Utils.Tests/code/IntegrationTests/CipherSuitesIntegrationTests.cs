@@ -87,22 +87,22 @@ public sealed class CipherSuitesIntegrationTests
 		CancellationToken cancellationToken = default
 	)
 	{
-		// Create server.
+		// Create server
 		var server = new TestServer();
 
-		// Build server application.
+		// Build server application
 		using var serverApplication = server.Build();
 
-		// Start listening for incoming connections.
+		// Start listening for incoming connections
 		await serverApplication.StartAsync(cancellationToken);
 
-		// Retrieve the port the server is actually bound to (port 0 lets the OS assign one).
+		// Retrieve the port the server is actually bound to (port 0 lets the OS assign one)
 		var port = new Uri(serverApplication.Urls.First()).Port;
 
-		// Connect to the server with a client configured to use the expected cipher suite.
+		// Connect to the server with a client configured to use the expected cipher suite
 		var result = await ConnectAndGetServerCertificate(port, protocol, cipherSuites, clientUse_rsa_pkcs1, clientUse_rsa_pss, cancellationToken);
 
-		// Stop the server application.
+		// Stop the server application
 		await serverApplication.StopAsync(cancellationToken);
 
 		return result;

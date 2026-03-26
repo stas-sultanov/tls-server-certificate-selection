@@ -159,8 +159,18 @@ public sealed class TlsClientHelloParserTests
 	[TestMethod]
 	public void TryParse_Fail_If_ClientHelloField_ExtensionsLength_ValueIsLessThan8()
 	{
-		// Minimum valid extensions length is 8 bytes, so use 7 to trigger validation failure.
-		var clientHello = TlsHelper.BuildClientHelloTls13(0x0303, 0, [], 2, [0, 0], 2, [0], 7, [0, 1, 2, 3, 4, 5, 6, 7]);
+		// Minimum valid extensions length is 8 bytes, so use 6 to trigger validation failure.
+		var clientHello = TlsHelper.BuildClientHelloTls13(0x0303, 0, [], 2, [0, 0], 2, [0], 6, [0, 1, 2, 3, 4, 5, 6, 7]);
+		var expectedErrorCode = TlsClientHelloParseErrorCode.ClientHello_ExtensionsLength_ValueIsInvalid;
+
+		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
+	}
+
+	[TestMethod]
+	public void TryParse_Fail_If_ClientHelloField_ExtensionsLength_ValueIsSmallerThanActualExtensionsData()
+	{
+		// Extensions length is 8 bytes while actual data size is 10 bytes.
+		var clientHello = TlsHelper.BuildClientHelloTls13(0x0303, 0, [], 2, [0, 0], 2, [0], 8, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 		var expectedErrorCode = TlsClientHelloParseErrorCode.ClientHello_ExtensionsLength_ValueIsInvalid;
 
 		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
@@ -233,6 +243,24 @@ public sealed class TlsClientHelloParserTests
 		var extension0 = TlsHelper.BuildExtension(0x000d, (UInt16) signatureScheme.Length, signatureScheme);
 		var extension1 = TlsHelper.BuildExtension(0x0002, 4, [0x00, 0x00, 0x00, 0x00]);
 		var clientHello = TlsHelper.BuildClientHelloTls13([..extension0, ..extension1]);
+		var expectedErrorCode = TlsClientHelloParseErrorCode.SignatureSchemeList_SupportedSignatureAlgorithmsLength_ValueIsInvalid;
+
+		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
+	}
+
+	[TestMethod]
+	public void TryParse_Fail_If_SignatureAlgorithms_ContainsTrailingBytesAfterDeclaredList()
+	{
+		// supported_signature_algorithms.length = 2, one scheme follows, then 2 trailing bytes
+		var malformedSignatureAlgorithmsData = new Byte[]
+		{
+			0x00, 0x02,
+			0x04, 0x01,
+			0xBE, 0xEF,
+		};
+
+		var extension = TlsHelper.BuildExtension(0x000d, (UInt16) malformedSignatureAlgorithmsData.Length, malformedSignatureAlgorithmsData);
+		var clientHello = TlsHelper.BuildClientHelloTls13(extension);
 		var expectedErrorCode = TlsClientHelloParseErrorCode.SignatureSchemeList_SupportedSignatureAlgorithmsLength_ValueIsInvalid;
 
 		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);

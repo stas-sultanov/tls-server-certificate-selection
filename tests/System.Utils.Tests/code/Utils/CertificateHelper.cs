@@ -86,7 +86,7 @@ internal sealed class CertificateHelper
 		// Create instance of key algorithm
 		using var key = RSA.Create(keySizeInBits);
 
-		// RSA signatures require a padding scheme.
+		// RSA signatures require a padding scheme
 		// RSASignaturePadding.Pkcs1 implements PKCS#1 v1.5 signature encoding
 		var request = new CertificateRequest(SubjectName, key, hashAlgorithm, padding);
 

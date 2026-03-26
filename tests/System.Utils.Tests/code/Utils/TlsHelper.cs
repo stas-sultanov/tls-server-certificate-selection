@@ -43,7 +43,7 @@ internal static class TlsHelper
 		Byte[] legacy_compression_methods_data
 	)
 	{
-		// Allocate enough for declared lengths, with minimum valid TLS12 ClientHello body size.
+		// Allocate enough for declared lengths, with minimum valid TLS12 ClientHello body size
 		var clientHelloLength = 2 + 32 + 1 + legacy_session_id_data.Length + 2 + cipher_suites_data.Length + 1 + legacy_compression_methods_data.Length;
 		var result = new Byte[clientHelloLength];
 
@@ -149,21 +149,21 @@ internal static class TlsHelper
 		// 1 byte for msg_type + 3 bytes for length + message body
 		var resultLength = 4 + message.Length;
 
-		// Allocate exact header + payload size.
+		// Allocate exact header + payload size
 		var result = new Byte[resultLength];
 
 		// Handshake.msg_type
 		result[0] = msg_type;
 
-		// Handshake.length as 3-byte big-endian.
+		// Handshake.length as 3-byte big-endian
 		result[1] = (Byte) (length >> 16);
 		result[2] = (Byte) (length >> 8);
 		result[3] = (Byte) length;
 
-		// Copy message after the 4-byte handshake header.
+		// Copy message after the 4-byte handshake header
 		Buffer.BlockCopy(message, 0, result, 4, message.Length);
 
-		// Return complete handshake bytes.
+		// Return complete handshake bytes
 		return result;
 	}
 

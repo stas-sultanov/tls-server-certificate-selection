@@ -281,7 +281,7 @@ public static class TlsClientHelloParser
 		ReadOnlySequence<Byte> signatureAlgorithms, signatureAlgorithmsCert;
 
 		// According to TLS 1.2, ClientHello.extensions is optional
-		// If there are no bytes left to read, return the info with just the cipher suites.
+		// If there are no bytes left to read, return the info with just the cipher suites
 		if (remainingLength == 0)
 		{
 			signatureAlgorithms = default;
@@ -343,8 +343,8 @@ public static class TlsClientHelloParser
 
 		// Validate ClientHello.extensions.length
 		// must be between 8 and 65535
-		// must not exceed the available bytes in the ClientHello body
-		if ((dataLength - extensionsLength) < 0 || extensionsLength < 8)
+		// must be exactly equal to the available bytes in the ClientHello.extensions block
+		if (extensionsLength < 8 || extensionsLength != dataLength)
 		{
 			return TlsClientHelloParseErrorCode.ClientHello_ExtensionsLength_ValueIsInvalid;
 		}
@@ -432,9 +432,10 @@ public static class TlsClientHelloParser
 		}
 
 		// Validate SignatureSchemeList.supported_signature_algorithms.length
-		// must be non-zero and a multiple of 2, since each signature scheme is represented by 2 bytes
-		// must not exceed the available bytes for reading
-		if (supportedSignatureAlgorithmsLength == 0 || (supportedSignatureAlgorithmsLength % 2) != 0 || (2 + supportedSignatureAlgorithmsLength) > dataLength)
+		// must be non-zero
+		// must be a multiple of 2, since each signature scheme is represented by 2 bytes
+		// must exactly match the available bytes for reading
+		if (supportedSignatureAlgorithmsLength == 0 || (supportedSignatureAlgorithmsLength % 2) != 0 || (2 + supportedSignatureAlgorithmsLength) != dataLength)
 		{
 			signatureAlgorithms = default;
 			return TlsClientHelloParseErrorCode.SignatureSchemeList_SupportedSignatureAlgorithmsLength_ValueIsInvalid;
