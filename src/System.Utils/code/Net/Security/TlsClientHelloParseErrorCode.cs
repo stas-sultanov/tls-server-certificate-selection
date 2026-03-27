@@ -97,6 +97,11 @@ public enum TlsClientHelloParseErrorCode
 	ClientHello_Field_Extensions_Length_IsInvalid = ErrorCodeGroup.ClientHello | 0x41,
 
 	/// <summary>
+	/// The Extension structure is malformed.
+	/// </summary>
+	Extension_Body_IsMalformed = ErrorCodeGroup.Extension | 0x01,
+
+	/// <summary>
 	/// The Extension.extension_data.length is invalid.
 	/// </summary>
 	Extension_Field_ExtensionData_Length_IsInvalid = ErrorCodeGroup.Extension | 0x11,

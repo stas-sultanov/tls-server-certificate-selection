@@ -107,10 +107,30 @@ public sealed class TlsClientHelloParserTests
 	#region Test Methods: Fail on ClientHello
 
 	[TestMethod]
-	public void TryParse_Fail_ClientHello_Body_IsMalformed()
+	public void TryParse_Fail_ClientHello_Body_IsMalformed_CompressionMethodsLength_IsGreater()
 	{
 		// Declare compression methods length of 2 with only 1 byte payload to trigger validation failure.
 		var clientHello = TlsHelper.BuildClientHelloTls12(0x0303, 0, [], 2, [0, 0], 2, [0]);
+		var expectedErrorCode = TlsClientHelloParseErrorCode.ClientHello_Body_IsMalformed;
+
+		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
+	}
+
+	[TestMethod]
+	public void TryParse_Fail_ClientHello_Body_IsMalformed_ExtensionsLength_IsLess()
+	{
+		// Extensions length is 8 bytes while actual data size is 10 bytes.
+		var clientHello = TlsHelper.BuildClientHello(0x0303, 0, [], 2, [0, 0], 1, [0], 8, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+		var expectedErrorCode = TlsClientHelloParseErrorCode.ClientHello_Body_IsMalformed;
+
+		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
+	}
+
+	[TestMethod]
+	public void TryParse_Fail_ClientHello_Body_IsMalformed_ExtensionsLength_IsGreater()
+	{
+		// Declare extensions length of 9 bytes with only 8 bytes payload to trigger validation failure.
+		var clientHello = TlsHelper.BuildClientHello(0x0303, 0, [], 2, [0, 0], 1, [0], 9, [0, 1, 2, 3, 4, 5, 6, 7]);
 		var expectedErrorCode = TlsClientHelloParseErrorCode.ClientHello_Body_IsMalformed;
 
 		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
@@ -166,44 +186,28 @@ public sealed class TlsClientHelloParserTests
 		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
 	}
 
+	#endregion
+
+	#region Test Methods: Fail on Extension
+
 	[TestMethod]
-	public void TryParse_Fail_ClientHello_Field_Extensions_Length_IsInvalid_ValueIsLess()
+	public void TryParse_Fail_Extension_Body_IsMalformed_LengthIsGreater()
 	{
-		// Extensions length is 8 bytes while actual data size is 10 bytes.
-		var clientHello = TlsHelper.BuildClientHello(0x0303, 0, [], 2, [0, 0], 1, [0], 8, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-		var expectedErrorCode = TlsClientHelloParseErrorCode.ClientHello_Field_Extensions_Length_IsInvalid;
+		// Declare extensions length of 5 bytes with only 4 bytes payload to trigger validation failure.
+		var extension = TlsHelper.BuildExtension(1, 5, [0, 1, 2, 3]);
+		var clientHello = TlsHelper.BuildClientHelloTls13(extension);
+		var expectedErrorCode = TlsClientHelloParseErrorCode.Extension_Body_IsMalformed;
 
 		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
 	}
 
 	[TestMethod]
-	public void TryParse_Fail_ClientHello_Field_Extensions_Length_IsInvalid_ValueIsGreater()
-	{
-		// Declare extensions length of 9 bytes with only 8 bytes payload to trigger validation failure.
-		var clientHello = TlsHelper.BuildClientHello(0x0303, 0, [], 2, [0, 0], 1, [0], 9, [0, 1, 2, 3, 4, 5, 6, 7]);
-		var expectedErrorCode = TlsClientHelloParseErrorCode.ClientHello_Field_Extensions_Length_IsInvalid;
-
-		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
-	}
-
-	[TestMethod]
-	public void TryParse_Fail_Extension_Field_ExtensionData_Length_IsInvalid_ValueIsLess()
+	public void TryParse_Fail_Extension_Field_ExtensionData_Length_IsInvalid()
 	{
 		// Declare extensions length of 3 bytes with only 4 bytes payload to trigger validation failure.
 		var extension = TlsHelper.BuildExtension(1, 3, [0, 1, 2, 3]);
 		var clientHello = TlsHelper.BuildClientHelloTls13(extension);
 		var expectedErrorCode = TlsClientHelloParseErrorCode.ReadError;
-
-		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
-	}
-
-	[TestMethod]
-	public void TryParse_Fail_Extension_Field_ExtensionData_Length_IsInvalid_ValueIsGreater()
-	{
-		// Declare extensions length of 5 bytes with only 4 bytes payload to trigger validation failure.
-		var extension = TlsHelper.BuildExtension(1, 5, [0, 1, 2, 3]);
-		var clientHello = TlsHelper.BuildClientHelloTls13(extension);
-		var expectedErrorCode = TlsClientHelloParseErrorCode.Extension_Field_ExtensionData_Length_IsInvalid;
 
 		TestTryParseClientHello(clientHello, expectedErrorCode, _ => true);
 	}

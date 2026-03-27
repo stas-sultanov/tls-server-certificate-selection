@@ -363,9 +363,10 @@ public static class TlsClientHelloParser
 		// Subtract the processed field size from the remaining available bytes
 		dataLength -= 2;
 
+		// Validate current data block
 		if (extensionsLength != dataLength)
 		{
-			return TlsClientHelloParseErrorCode.ClientHello_Field_Extensions_Length_IsInvalid;
+			return TlsClientHelloParseErrorCode.ClientHello_Body_IsMalformed;
 		}
 
 		// TLS 1.2 ClientHello.extensions allow 0 value
@@ -375,9 +376,7 @@ public static class TlsClientHelloParser
 			return TlsClientHelloParseErrorCode.None;
 		}
 
-		// Validate ClientHello.extensions.length
-		// must be between 8 and 65535
-		// must be exactly equal to the available bytes in the ClientHello.extensions block
+		// Validate ClientHello.extensions.length, must be between 8 and 65535
 		if (extensionsLength < 8)
 		{
 			return TlsClientHelloParseErrorCode.ClientHello_Field_Extensions_Length_IsInvalid;
@@ -405,7 +404,7 @@ public static class TlsClientHelloParser
 			// must not exceed the available bytes in the extensions block
 			if (dataLength < 0)
 			{
-				return TlsClientHelloParseErrorCode.Extension_Field_ExtensionData_Length_IsInvalid;
+				return TlsClientHelloParseErrorCode.Extension_Body_IsMalformed;
 			}
 
 			switch (extensionType)
