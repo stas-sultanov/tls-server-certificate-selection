@@ -56,7 +56,7 @@ jobs:
 
       - name: Restore
         run: >-
-          dotnet restore ${{ env.TEST_PROJECT_PATH }}
+          dotnet restore --project ${{ env.TEST_PROJECT_PATH }}
           --verbosity ${{ env.DOTNET_VERBOSITY }}
 
       - name: Build
@@ -68,7 +68,7 @@ jobs:
 
       - name: Run Tests
         run: >-
-          dotnet test ${{ env.TEST_PROJECT_PATH }}
+          dotnet test --project ${{ env.TEST_PROJECT_PATH }}
           --configuration ${{ env.BUILD_CONFIGURATION }}
           --no-build
           --coverage
