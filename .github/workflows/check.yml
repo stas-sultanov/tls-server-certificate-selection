@@ -68,10 +68,12 @@ jobs:
       - name: Run Tests
         run: >-
           dotnet test ${{ env.TEST_PROJECT_PATH }}
-          --collect:"Code Coverage;Format=Cobertura"
           --configuration ${{ env.BUILD_CONFIGURATION }}
           --no-build
-          --logger "trx;LogFileName=test-results.trx"
+          --coverage
+          --coverage-output-format cobertura
+          --report-trx
+          --report-trx-filename test-results.trx
           --results-directory ${{ env.TESTS_RESULTS_DIRECTORY_NAME }}
           --verbosity ${{ env.DOTNET_VERBOSITY }}
 
