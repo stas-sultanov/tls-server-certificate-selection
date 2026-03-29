@@ -26,6 +26,8 @@ env:
   DOTNET_HOST_TRACE_VERBOSITY: 1
   # Specifies whether .NET welcome and telemetry messages are displayed on the first run.
   DOTNET_NOLOGO: true
+  # Specifies the version of the .NET SDK to use.
+  DOTNET_VERSION: 10.0.x
   # Name of the shared tests artifact
   TESTS_ARTIFACT_NAME: tests
 
@@ -60,7 +62,7 @@ jobs:
     - name: Setup .NET 10
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 10.0.x
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Restore
       run: >-
@@ -112,7 +114,7 @@ jobs:
     - name: Setup .NET 10
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 10.0.x
+        dotnet-version: ${{ env.DOTNET_VERSION }}
       env:
         DOTNET_NOLOGO: true
 
@@ -125,7 +127,7 @@ jobs:
       run: >-
         dotnet test ./System.Utils.Tests.dll
         --collect:"Code Coverage;Format=Cobertura"
-        --filter TestCategory=UnitTests
+        --filter TestCategory=Unit
         --logger:"trx"
         --results-directory ${{ env.TESTS_RESULTS_DIRECTORY_NAME }}
 
@@ -153,3 +155,51 @@ jobs:
         header: Unit Tests
         recreate: true
         path: code-coverage-results.md
+
+  runIntegrationTests:
+
+    env:
+      # Path to the test results directory relative to the root of the project.
+      TESTS_RESULTS_DIRECTORY_NAME: testsResults
+
+    name: Run Integration Tests
+
+    needs: build
+
+    permissions:
+      # Required by [EnricoMi/publish-unit-test-result-action]
+      checks: write
+      # Required by [EnricoMi/publish-unit-test-result-action, marocchino/sticky-pull-request-comment]
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+      env:
+        DOTNET_NOLOGO: true
+
+    - name: Download Build
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.TESTS_ARTIFACT_NAME }}
+
+    - name: Run Tests
+      run: >-
+        dotnet test ./System.Utils.Tests.dll
+        --collect:"Format=Cobertura"
+        --filter TestCategory=Integration
+        --logger:"trx"
+        --results-directory ${{ env.TESTS_RESULTS_DIRECTORY_NAME }}
+
+    - name: Publish Result
+      uses: EnricoMi/publish-unit-test-result-action@c950f6fb443cb5af20a377fd0dfaa78838901040 #v2.23.0
+      with:
+        check_name: Integration Tests
+        check_run: false # feature does not work well like at all
+        files: |
+          ${{ env.TESTS_RESULTS_DIRECTORY_NAME }}/*.trx

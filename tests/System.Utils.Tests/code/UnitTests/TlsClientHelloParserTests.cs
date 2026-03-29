@@ -9,7 +9,7 @@ using System.Net.Security;
 /// <summary>
 /// Unit tests for <see cref="TlsClientHelloParser"/> class.
 /// </summary>
-[TestCategory("UnitTests")]
+[TestCategory("Unit")]
 [TestClass]
 public sealed class TlsClientHelloParserTests
 {
