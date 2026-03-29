@@ -191,7 +191,7 @@ jobs:
     - name: Run Tests
       run: >-
         dotnet test ./System.Utils.Tests.dll
-        --collect:"Format=Cobertura"
+        --collect:"Code Coverage;Format=Cobertura"
         --filter TestCategory=Integration
         --logger:"trx"
         --results-directory ${{ env.TESTS_RESULTS_DIRECTORY_NAME }}
